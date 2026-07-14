@@ -4,8 +4,10 @@ from pathlib import Path
 from fastapi import FastAPI
 from starlette.staticfiles import StaticFiles
 from starlette.responses import FileResponse
+from app.apis import practice_apis 
 
 app = FastAPI()
+app.include_router(practice_apis.router)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
