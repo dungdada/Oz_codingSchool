@@ -3,6 +3,15 @@
         <h2>회원 관리 (관리자 전용)</h2>
     </div>
 
+    <div class="search-bar" style="margin-bottom: 1rem; display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+        <select id="admin-role-target" style="width: 150px;">
+            <option value="pending">대기자</option>
+            <option value="staff">스태프</option>
+            <option value="admin">어드민</option>
+        </select>
+        <button onclick="pages.handleSelectedRoleUpdate()">권한 변경</button>
+    </div>
+
     <div class="search-bar" style="margin-bottom: 1.5rem; display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
         <input type="text" id="admin-search-query" placeholder="이름 또는 이메일 검색" style="flex: 1; min-width: 200px;" onkeypress="if(event.key === 'Enter') pages.handleAdminSearch()">
         <select id="admin-filter-dept" style="width: 150px;" onchange="pages.handleAdminSearch()">
@@ -18,6 +27,7 @@
     <table>
         <thead>
             <tr>
+                <th>선택</th>
                 <th>ID</th>
                 <th>이름</th>
                 <th>이메일</th>

@@ -4,10 +4,12 @@ from pathlib import Path
 from fastapi import FastAPI
 from starlette.staticfiles import StaticFiles
 from starlette.responses import FileResponse
-from app.apis import practice_apis 
+from app.apis import admin_user_api, medical_record_api, practice_apis
 
 app = FastAPI()
+app.include_router(admin_user_api.router)
 app.include_router(practice_apis.router)
+app.include_router(medical_record_api.router)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -16,11 +18,14 @@ if not (BASE_DIR / "static").exists():
     os.mkdir(BASE_DIR / "static")
 if not (BASE_DIR / "media").exists():
     os.mkdir(BASE_DIR / "media")
+if not (BASE_DIR / "uploads").exists():
+    os.mkdir(BASE_DIR / "uploads")
 
 # 'static' 폴더를 '/static' 경로로 마운트 (CSS, JS 파일 서빙용)
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 # 'media' 폴더를 '/media' 경로로 마운트 (사용자 업로드 파일 서빙용)
 app.mount("/media", StaticFiles(directory=BASE_DIR / "media"), name="media")
+app.mount("/uploads", StaticFiles(directory=BASE_DIR / "uploads"), name="uploads")
 
 
 @app.get(path="/healthcheck", status_code=200, include_in_schema=False)
@@ -40,6 +45,7 @@ async def catch_all(path: str):
         path.startswith("api/v1")
         or path.startswith("static/")
         or path.startswith("media/")
+        or path.startswith("uploads/")
     ):
         from fastapi import HTTPException
 

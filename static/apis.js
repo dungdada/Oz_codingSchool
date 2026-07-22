@@ -23,6 +23,9 @@ const apis = {
         if (state.token) {
             headers['Authorization'] = `Bearer ${state.token}`;
         }
+        if (state.user?.role) {
+            headers['X-User-Role'] = state.user.role;
+        }
 
         try {
             const response = await fetch(`${API_BASE}${url}`, { ...options, headers });
