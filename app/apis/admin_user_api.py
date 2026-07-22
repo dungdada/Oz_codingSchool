@@ -1,10 +1,11 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db.databases import async_get_db
-from app.models.user import Department, UserRole
+from app.core.dependencies import get_current_user
+from app.models.user import Department, User, UserRole
 from app.schemas.admin_user import (
     AdminUserResponse,
     AdminUserRoleUpdateRequest,
@@ -15,9 +16,10 @@ from app.services import admin_user_service
 router = APIRouter(prefix="/api/v1/admin/users", tags=["admin-users"])
 
 
-def require_admin_user(x_user_role: Annotated[UserRole | None, Header(alias="X-User-Role")] = None) -> None:
-    if x_user_role != UserRole.ADMIN:
+def require_admin_user(current_user: Annotated[User, Depends(get_current_user)]) -> User:
+    if current_user.role != UserRole.ADMIN:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="관리자 권한이 필요합니다.")
+    return current_user
 
 
 @router.get(
