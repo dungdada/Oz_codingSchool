@@ -7,6 +7,8 @@ class Settings(BaseSettings):
     DB_HOST: str = "localhost"
     DB_PORT: str = "3306"
     DB_NAME: str = "ai_health"
+    JWT_SECRET_KEY: str = "change-this-development-secret-key"
+    JWT_ALGORITHM: str = "HS256"
 
     model_config = {
         "env_file": ".env",
