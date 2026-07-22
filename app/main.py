@@ -12,7 +12,8 @@ from app.apis import (
     user_management_apis, 
     user_change_pw_apis, 
     admin_user_api, 
-    patient_apis
+    patient_apis,
+    delete_user_apis
     )
 
 
@@ -26,6 +27,7 @@ app.include_router(user_management_apis.router)     #회원정보수정
 app.include_router(user_change_pw_apis.router)      #비번변경
 app.include_router(admin_user_api.router)           #회원권한변경
 app.include_router(patient_apis.router)             #환자등록/상세조회
+app.include_router(delete_user_apis.router)         #회원탈퇴
 
 app.include_router(practice_apis.router)
 
