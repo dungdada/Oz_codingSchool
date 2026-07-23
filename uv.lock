@@ -24,7 +24,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "alembic", specifier = ">=1.18.4" },
-    { name = "argon2-cffi", specifier = ">=25.1.0" },
+    { name = "argon2-cffi", specifier = ">=23.1.0" },
     { name = "asyncmy", specifier = ">=0.2.11" },
     { name = "cryptography", specifier = ">=46.0.6" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.135.3" },
