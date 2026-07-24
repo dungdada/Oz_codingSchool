@@ -2,40 +2,39 @@ import os
 from pathlib import Path
 
 from fastapi import FastAPI
-from starlette.staticfiles import StaticFiles
 from starlette.responses import FileResponse
-from app.apis import practice_apis, user_apis
+from starlette.staticfiles import StaticFiles
 
 from app.apis import (
-    user_apis,
-    admin_user_api, 
-    user_management_apis, 
-    user_change_pw_apis, 
-    admin_user_api, 
-    patient_apis,
+    admin_user_list_apis,
+    admin_user_api,
+    auth_apis,
     delete_user_apis,
-    medical_record_query_apis
-    )
-
-
-
+    medical_record_api,
+    medical_record_query_apis,
+    my_page_apis,
+    patient_list_apis,
+    patient_apis,
+    practice_apis,
+    user_apis,
+    user_change_pw_apis,
+    user_management_apis,
+)
 
 app = FastAPI()
-## API router 연결
-app.include_router(admin_user_api.router)           #권한변경
-app.include_router(user_apis.router)                #회원가입
-app.include_router(user_management_apis.router)     #회원정보수정
-app.include_router(user_change_pw_apis.router)      #비번변경
-app.include_router(admin_user_api.router)           #회원권한변경
-app.include_router(patient_apis.router)             #환자등록/상세조회
-app.include_router(delete_user_apis.router)         #회원탈퇴
-app.include_router(medical_record_query_apis.router)#진료기록목록조회/진료기록상세조회
-
-
-
-
 app.include_router(practice_apis.router)
 app.include_router(user_apis.router)
+app.include_router(auth_apis.router)
+app.include_router(user_management_apis.router)
+app.include_router(user_change_pw_apis.router)
+app.include_router(my_page_apis.router)
+app.include_router(patient_apis.router)
+app.include_router(patient_list_apis.router)
+app.include_router(admin_user_list_apis.router)
+app.include_router(admin_user_api.router)
+app.include_router(delete_user_apis.router)
+app.include_router(medical_record_query_apis.router)
+app.include_router(medical_record_api.router)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -44,11 +43,14 @@ if not (BASE_DIR / "static").exists():
     os.mkdir(BASE_DIR / "static")
 if not (BASE_DIR / "media").exists():
     os.mkdir(BASE_DIR / "media")
+if not (BASE_DIR / "uploads").exists():
+    os.mkdir(BASE_DIR / "uploads")
 
 # 'static' 폴더를 '/static' 경로로 마운트 (CSS, JS 파일 서빙용)
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 # 'media' 폴더를 '/media' 경로로 마운트 (사용자 업로드 파일 서빙용)
 app.mount("/media", StaticFiles(directory=BASE_DIR / "media"), name="media")
+app.mount("/uploads", StaticFiles(directory=BASE_DIR / "uploads"), name="uploads")
 
 
 @app.get(path="/healthcheck", status_code=200, include_in_schema=False)
@@ -68,6 +70,7 @@ async def catch_all(path: str):
         path.startswith("api/v1")
         or path.startswith("static/")
         or path.startswith("media/")
+        or path.startswith("uploads/")
     ):
         from fastapi import HTTPException
 

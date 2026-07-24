@@ -23,7 +23,6 @@ const apis = {
         if (state.token) {
             headers['Authorization'] = `Bearer ${state.token}`;
         }
-
         try {
             const response = await fetch(`${API_BASE}${url}`, { ...options, headers });
             
