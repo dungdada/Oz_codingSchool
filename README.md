@@ -18,6 +18,26 @@ class index `1`을 폐렴으로 간주하며 임계값은 `0.5`입니다. 학습
 전체 모델 pickle은 임의 코드 실행 위험이 있으므로 저장소에 포함된 검증된
 체크포인트 외의 `.pth` 파일로 교체하지 마세요.
 
+## 개발 관리자 계정
+
+DB 마이그레이션 후 개발 관리자 시드를 실행합니다.
+
+```bash
+uv run alembic upgrade head
+uv run python scripts/seed_admin.py
+```
+
+기본 개발 계정:
+
+```text
+이메일: admin@example.com
+비밀번호: Admin1234!
+```
+
+기존에 같은 이메일이 있으면 비밀번호와 역할을 개발 관리자 값으로 갱신합니다.
+이 스크립트는 `APP_ENV=production`에서는 실행되지 않습니다. 실제 운영 환경에서는
+기본 비밀번호를 사용하지 마세요.
+
 ## Alembic Migration Guide
 
 이 프로젝트는 데이터베이스 마이그레이션을 위해 Alembic을 사용합니다.
