@@ -13,7 +13,8 @@ from app.apis import (
     user_change_pw_apis, 
     patient_apis,
     delete_user_apis,
-    medical_record_query_apis
+    medical_record_query_apis,
+    my_page_apis,
     )
 
 
@@ -28,6 +29,7 @@ app.include_router(user_change_pw_apis.router)      #비번변경
 app.include_router(patient_apis.router)             #환자등록/상세조회
 app.include_router(delete_user_apis.router)         #회원탈퇴
 app.include_router(medical_record_query_apis.router)#진료기록목록조회/진료기록상세조회
+app.include_router(my_page_apis.router)             #마이페이지조회
 
 
 
