@@ -1,6 +1,6 @@
 import re
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.models.user import Gender
 
@@ -27,6 +27,25 @@ class PatientCreateRequest(BaseModel):
         return validate_phone_number(v)
 
 
+class PatientUpdateRequest(BaseModel):
+    """REQ-PTNT-004: 이름/연락처만 부분 수정 가능"""
+    name: str | None = Field(None, min_length=1, max_length=50, description="환자 이름")
+    phone_number: str | None = Field(None, description="연락처")
+
+    @field_validator("phone_number")
+    @classmethod
+    def check_phone_number(cls, v: str | None) -> str | None:
+        if v is None:
+            return v
+        return validate_phone_number(v)
+
+    @model_validator(mode="after")
+    def check_at_least_one_field(self) -> "PatientUpdateRequest":
+        if self.name is None and self.phone_number is None:
+            raise ValueError("수정할 값을 최소 1개 이상 입력해야 합니다.")
+        return self
+
+
 # ---------- Responses ----------
 
 class PatientResponse(BaseModel):
@@ -37,3 +56,4 @@ class PatientResponse(BaseModel):
     phone_number: str
 
     model_config = {"from_attributes": True}
+
