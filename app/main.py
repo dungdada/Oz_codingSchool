@@ -4,7 +4,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from starlette.staticfiles import StaticFiles
 from starlette.responses import FileResponse
-from app.apis import practice_apis 
+from app.apis import practice_apis, user_apis
 
 from app.apis import (
     user_apis,
@@ -33,6 +33,7 @@ app.include_router(medical_record_query_apis.router)#진료기록목록조회/�
 
 
 app.include_router(practice_apis.router)
+app.include_router(user_apis.router)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
