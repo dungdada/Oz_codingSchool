@@ -2,40 +2,23 @@ import os
 from pathlib import Path
 
 from fastapi import FastAPI
-from starlette.staticfiles import StaticFiles
 from starlette.responses import FileResponse
-from app.apis import practice_apis, user_apis
+from starlette.staticfiles import StaticFiles
 
 from app.apis import (
+    admin_user_list_apis,
+    auth_apis,
+    patient_list_apis,
+    practice_apis,
     user_apis,
-    admin_user_api, 
-    user_management_apis, 
-    user_change_pw_apis, 
-    admin_user_api, 
-    patient_apis,
-    delete_user_apis,
-    medical_record_query_apis
-    )
-
-
-
+)
 
 app = FastAPI()
-## API router 연결
-app.include_router(admin_user_api.router)           #권한변경
-app.include_router(user_apis.router)                #회원가입
-app.include_router(user_management_apis.router)     #회원정보수정
-app.include_router(user_change_pw_apis.router)      #비번변경
-app.include_router(admin_user_api.router)           #회원권한변경
-app.include_router(patient_apis.router)             #환자등록/상세조회
-app.include_router(delete_user_apis.router)         #회원탈퇴
-app.include_router(medical_record_query_apis.router)#진료기록목록조회/진료기록상세조회
-
-
-
-
 app.include_router(practice_apis.router)
 app.include_router(user_apis.router)
+app.include_router(auth_apis.router)
+app.include_router(patient_list_apis.router)
+app.include_router(admin_user_list_apis.router)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
