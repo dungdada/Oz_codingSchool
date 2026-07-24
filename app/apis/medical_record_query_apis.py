@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.auth.dependencies import get_current_user
+from app.core.dependencies import get_current_user
 from app.core.db.databases import async_get_db
 from app.models.medical_record import MedicalRecord
 from app.models.user import User, UserRole
