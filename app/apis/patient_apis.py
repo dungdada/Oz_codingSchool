@@ -1,14 +1,15 @@
 from pathlib import Path
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Header, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.auth.dependencies import get_current_user
 from app.core.db.databases import async_get_db
 from app.models.medical_record import MedicalRecord
 from app.models.patient import Patient
-from app.models.user import UserRole
+from app.models.user import User, UserRole
 from app.schemas.patient import PatientCreateRequest, PatientResponse, PatientUpdateRequest
 
 router = APIRouter(prefix="/api/v1/patients", tags=["patients"])
@@ -17,31 +18,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 MEDIA_DIR = BASE_DIR / "media"
 
 
-def require_authenticated(
-    authorization: Annotated[str | None, Header()] = None,
-    x_user_role: Annotated[UserRole | None, Header(alias="X-User-Role")] = None,
-) -> UserRole:
-    """
-    로그인 여부만 확인한다.
-    TODO: 로그인(JWT) API가 merge되면 Authorization 헤더의 토큰을 실제로 검증하도록 교체 필요.
-    """
-    if not authorization or x_user_role is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="인증이 필요합니다.")
-    return x_user_role
-
-
-def require_staff_or_admin(role: Annotated[UserRole, Depends(require_authenticated)]) -> UserRole:
+def require_staff_or_admin_user(
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> User:
     """REQ-PTNT-001: 환자 등록은 사내 의료인(STAFF) 이상만 가능하다."""
-    if role not in (UserRole.STAFF, UserRole.ADMIN):
+    if current_user.role not in (UserRole.STAFF, UserRole.ADMIN):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="환자 등록 권한이 없습니다.")
-    return role
+    return current_user
 
 
 @router.post(
     "",
     response_model=PatientResponse,
     status_code=status.HTTP_201_CREATED,
-    dependencies=[Depends(require_staff_or_admin)],
+    dependencies=[Depends(require_staff_or_admin_user)],
 )
 async def create_patient(
     payload: PatientCreateRequest,
@@ -64,7 +54,7 @@ async def create_patient(
 @router.get(
     "/{patient_id}",
     response_model=PatientResponse,
-    dependencies=[Depends(require_authenticated)],
+    dependencies=[Depends(get_current_user)],
 )
 async def get_patient(
     patient_id: int,
@@ -92,7 +82,7 @@ async def _get_active_patient_or_404(patient_id: int, db: AsyncSession) -> Patie
 @router.patch(
     "/{patient_id}",
     response_model=PatientResponse,
-    dependencies=[Depends(require_authenticated)],
+    dependencies=[Depends(get_current_user)],
 )
 async def update_patient(
     patient_id: int,
@@ -131,7 +121,7 @@ def _delete_xray_file_best_effort(xray_image_url: str) -> None:
 @router.delete(
     "/{patient_id}",
     status_code=status.HTTP_204_NO_CONTENT,
-    dependencies=[Depends(require_authenticated)],
+    dependencies=[Depends(get_current_user)],
 )
 async def delete_patient(
     patient_id: int,
