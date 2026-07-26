@@ -312,8 +312,14 @@ const apis = {
      * [REQ-USER-004] 관리자 권한을 가진 유저는 전체 유저 목록을 조회할 수 있다.
      */
     async adminGetUsers(params = {}) {
-        const query = new URLSearchParams(params).toString();
-        return await this.request(`/admin/users${query ? `?${query}` : ''}`);
+        const normalizedParams = { ...params };
+        if (normalizedParams.query) {
+            normalizedParams.keyword = normalizedParams.query;
+            delete normalizedParams.query;
+        }
+        const query = new URLSearchParams(normalizedParams).toString();
+        const response = await this.request(`/admin/users${query ? `?${query}` : ''}`);
+        return Array.isArray(response) ? response : (response?.users ?? []);
     },
 
     /**
