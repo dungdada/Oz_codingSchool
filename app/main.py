@@ -15,6 +15,7 @@ from app.apis import (
     my_page_apis,
     patient_list_apis,
     patient_apis,
+    prediction_apis,
     practice_apis,
     user_apis,
     user_change_pw_apis,
@@ -35,6 +36,7 @@ app.include_router(admin_user_api.router)
 app.include_router(delete_user_apis.router)
 app.include_router(medical_record_query_apis.router)
 app.include_router(medical_record_api.router)
+app.include_router(prediction_apis.router)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
