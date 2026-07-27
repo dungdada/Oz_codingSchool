@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.models.user import Gender
 
-PHONE_REGEX = re.compile(r"^01[0-9]-\d{3,4}-\d{4}$")
+PHONE_REGEX = re.compile(r"^01[0-9]-?\d{3,4}-?\d{4}$")
 
 
 def validate_phone_number(phone_number: str) -> str:
