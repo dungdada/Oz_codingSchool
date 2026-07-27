@@ -4,6 +4,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from starlette.responses import FileResponse
 from starlette.staticfiles import StaticFiles
+from worker.model import load_model
 
 from app.apis import (
     admin_user_list_apis,
@@ -37,6 +38,11 @@ app.include_router(delete_user_apis.router)
 app.include_router(medical_record_query_apis.router)
 app.include_router(medical_record_api.router)
 app.include_router(prediction_apis.router)
+
+
+@app.on_event("startup")
+async def preload_pneumonia_model() -> None:
+    load_model()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 

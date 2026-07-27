@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from app.ml import pneumonia_predictor
+from worker import model as pneumonia_predictor
 
 torch = pytest.importorskip("torch")
 
@@ -18,7 +18,7 @@ def test_predicts_pneumonia_from_second_class(monkeypatch):
         "_prepare_image",
         lambda _path: torch.zeros((1, 3, 224, 224)),
     )
-    monkeypatch.setattr(pneumonia_predictor, "_load_model", lambda: FakeModel())
+    monkeypatch.setattr(pneumonia_predictor, "load_model", lambda: FakeModel())
 
     prediction = pneumonia_predictor.predict_pneumonia(Path("unused.jpg"))
 

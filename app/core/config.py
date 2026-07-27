@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     COOKIE_SECURE: bool = False
-    AI_MODEL_PATH: str = "app/ml/final_seed42_best8_full_model.pth"
+    AI_MODEL_PATH: str = "worker/models/final_seed42_best8_full_model.pth"
     AI_MODEL_NAME: str = "final-seed42-best8-efficientnet"
     AI_IMAGE_SIZE: int = 224
     AI_PNEUMONIA_CLASS_INDEX: int = 1

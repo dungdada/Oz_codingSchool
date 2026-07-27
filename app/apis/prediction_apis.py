@@ -6,7 +6,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.auth.dependencies import get_current_user
 from app.core.db.databases import async_get_db
-from app.ml import predict_pneumonia
 from app.models.user import User, UserRole
 from app.repositories.prediction_repository import PredictionRepository
 from app.core.config import settings
@@ -17,6 +16,7 @@ from app.schemas.prediction import (
     PredictionResponse,
 )
 from app.services.prediction_service import PredictionService
+from worker.model import predict_pneumonia
 
 router = APIRouter(
     prefix="/api/v1/medical-records",
