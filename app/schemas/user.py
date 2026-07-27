@@ -4,7 +4,7 @@ from pydantic import BaseModel, EmailStr, Field, field_validator
 
 from app.models.user import Department, Gender, UserRole
 
-PHONE_REGEX = re.compile(r"^01[0-9]-\d{3,4}-\d{4}$")
+PHONE_REGEX = re.compile(r"^01[0-9]-?\d{3,4}-?\d{4}$")
 
 
 def validate_password_rules(password: str) -> str:
