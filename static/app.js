@@ -150,7 +150,8 @@ async function navigate(path, pushState = true) {
             return;
         }
 
-        if (state.user && state.user.role === 'pending' && !publicPaths.includes(pathname)) {
+        const pendingAllowedPaths = [...publicPaths, '/my-page'];
+        if (state.user && state.user.role === 'pending' && !pendingAllowedPaths.includes(pathname)) {
             utils.showAlert('승인 대기 중인 사용자입니다. 관리자의 승인 이후에 사용가능합니다.', 'error', '접근 제한');
             await navigate('/');
             return;
@@ -159,6 +160,22 @@ async function navigate(path, pushState = true) {
         if (pathname === '/admin/users' && state.user?.role !== 'admin') {
             utils.showAlert('관리자 권한이 필요합니다.', 'error', '접근 제한');
             await navigate('/');
+            return;
+        }
+
+        const requiresMedicalWriter = pathname === '/patients/create'
+            || (
+                pathname.startsWith('/patients/')
+                && pathname.endsWith('/medical-records/create')
+            );
+        const isMedicalWriter = state.user?.role === 'admin'
+            || (
+                state.user?.role === 'staff'
+                && state.user?.department === 'medical team'
+            );
+        if (requiresMedicalWriter && !isMedicalWriter) {
+            utils.showAlert('의료인 권한이 필요합니다.', 'error', '접근 제한');
+            await navigate('/patients');
             return;
         }
 

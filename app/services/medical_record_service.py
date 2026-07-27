@@ -23,8 +23,9 @@ class MedicalRecordService:
         self,
         *,
         patient_id: int,
+        created_by: int,
         chart_number: str,
-        symptom: str,
+        symptoms: str,
         xray_image: UploadFile,
     ) -> MedicalRecord:
         extension = Path(xray_image.filename or "").suffix.lower()
@@ -53,8 +54,9 @@ class MedicalRecordService:
 
             return await self.repository.create(
                 patient_id=patient_id,
+                created_by=created_by,
                 chart_number=chart_number,
-                symptom=symptom,
+                symptoms=symptoms,
                 xray_image_url=image_url,
             )
         except Exception:

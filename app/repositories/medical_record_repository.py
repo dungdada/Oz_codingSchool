@@ -22,14 +22,16 @@ class MedicalRecordRepository:
         self,
         *,
         patient_id: int,
+        created_by: int,
         chart_number: str,
-        symptom: str,
+        symptoms: str,
         xray_image_url: str,
     ) -> MedicalRecord:
         record = MedicalRecord(
             patient_id=patient_id,
+            created_by=created_by,
             chart_number=chart_number,
-            symptoms=symptom,
+            symptoms=symptoms,
             xray_image_url=xray_image_url,
         )
         self.db.add(record)

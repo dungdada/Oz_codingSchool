@@ -28,8 +28,9 @@ async def test_rejects_unsupported_image_before_lookup(tmp_path):
     with pytest.raises(HTTPException) as error:
         await service.create_medical_record(
             patient_id=15,
+            created_by=7,
             chart_number="CH-1",
-            symptom="기침",
+            symptoms="기침",
             xray_image=upload,
         )
 
@@ -45,8 +46,9 @@ async def test_returns_404_when_patient_does_not_exist(tmp_path):
     with pytest.raises(HTTPException) as error:
         await service.create_medical_record(
             patient_id=999,
+            created_by=7,
             chart_number="CH-1",
-            symptom="기침",
+            symptoms="기침",
             xray_image=upload,
         )
 
@@ -62,8 +64,9 @@ async def test_saves_image_and_creates_record(tmp_path):
 
     await service.create_medical_record(
         patient_id=15,
+        created_by=7,
         chart_number="CH-20260720-001",
-        symptom="지속적인 기침과 발열 증상",
+        symptoms="지속적인 기침과 발열 증상",
         xray_image=upload,
     )
 
@@ -72,4 +75,6 @@ async def test_saves_image_and_creates_record(tmp_path):
     assert saved_files[0].suffix == ".jpeg"
     assert saved_files[0].read_bytes() == b"image-data"
     assert repository.created is not None
+    assert repository.created["created_by"] == 7
+    assert repository.created["symptoms"] == "지속적인 기침과 발열 증상"
     assert repository.created["xray_image_url"].startswith("/uploads/xray/")

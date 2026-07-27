@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     COOKIE_SECURE: bool = False
+    API_SLOW_REQUEST_SECONDS: float = 3.0
     AI_MODEL_PATH: str = "worker/models/final_seed42_best8_weights_only.pth"
     AI_MODEL_ARCHITECTURE: str = "efficientnet_b0"
     AI_MODEL_NUM_CLASSES: int = 2

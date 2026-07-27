@@ -9,19 +9,33 @@ from app.core.auth.dependencies import get_current_user
 from app.core.db.databases import async_get_db
 from app.models.medical_record import MedicalRecord
 from app.models.patient import Patient
-from app.models.user import User, UserRole
+from app.models.user import Department, User, UserRole
 from app.schemas.patient import PatientCreateRequest, PatientResponse, PatientUpdateRequest
 
 router = APIRouter(prefix="/api/v1/patients", tags=["patients"])
 BASE_DIR = Path(__file__).resolve().parents[2]
 
 
-def require_staff_or_admin(
+def require_medical_staff_or_admin(
     current_user: Annotated[User, Depends(get_current_user)],
 ) -> User:
-    """REQ-PTNT-001: 환자 등록은 사내 의료인(STAFF) 이상만 가능하다."""
-    if current_user.role not in (UserRole.STAFF, UserRole.ADMIN):
+    is_medical_staff = (
+        current_user.role == UserRole.STAFF
+        and current_user.department == Department.MEDICAL_TEAM
+    )
+    if current_user.role != UserRole.ADMIN and not is_medical_staff:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="환자 등록 권한이 없습니다.")
+    return current_user
+
+
+def require_internal_user(
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> User:
+    if current_user.role not in (UserRole.STAFF, UserRole.ADMIN):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="승인된 사내 사용자 권한이 필요합니다.",
+        )
     return current_user
 
 
@@ -29,7 +43,7 @@ def require_staff_or_admin(
     "",
     response_model=PatientResponse,
     status_code=status.HTTP_201_CREATED,
-    dependencies=[Depends(require_staff_or_admin)],
+    dependencies=[Depends(require_medical_staff_or_admin)],
 )
 async def create_patient(
     payload: PatientCreateRequest,
@@ -52,7 +66,7 @@ async def create_patient(
 @router.get(
     "/{patient_id}",
     response_model=PatientResponse,
-    dependencies=[Depends(get_current_user)],
+    dependencies=[Depends(require_internal_user)],
 )
 async def get_patient(
     patient_id: int,
@@ -86,7 +100,7 @@ async def _get_active_patient_or_404(
 @router.patch(
     "/{patient_id}",
     response_model=PatientResponse,
-    dependencies=[Depends(get_current_user)],
+    dependencies=[Depends(require_internal_user)],
 )
 async def update_patient(
     patient_id: int,
@@ -116,7 +130,7 @@ def _delete_xray_file_best_effort(xray_image_url: str) -> None:
 @router.delete(
     "/{patient_id}",
     status_code=status.HTTP_204_NO_CONTENT,
-    dependencies=[Depends(get_current_user)],
+    dependencies=[Depends(require_internal_user)],
 )
 async def delete_patient(
     patient_id: int,

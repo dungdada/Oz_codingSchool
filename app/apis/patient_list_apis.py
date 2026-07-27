@@ -4,8 +4,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.auth.dependencies import get_current_user
 from app.core.db.databases import async_get_db
+from app.apis.patient_apis import require_internal_user
 from app.models.patient import Patient
 from app.models.user import Gender, User
 from app.schemas.list_responses import PatientListItem
@@ -15,7 +15,7 @@ router = APIRouter(prefix="/api/v1/patients", tags=["patients"])
 
 @router.get("", response_model=list[PatientListItem])
 async def get_patients(
-    _: Annotated[User, Depends(get_current_user)],
+    _: Annotated[User, Depends(require_internal_user)],
     db: Annotated[AsyncSession, Depends(async_get_db)],
     name: Annotated[str | None, Query(min_length=1)] = None,
     gender: Annotated[Gender | None, Query()] = None,

@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from starlette.responses import FileResponse
 from starlette.staticfiles import StaticFiles
 from worker.model import load_model
+from app.core.performance import observe_api_performance
 
 from app.apis import (
     admin_user_list_apis,
@@ -24,6 +25,7 @@ from app.apis import (
 )
 
 app = FastAPI()
+app.middleware("http")(observe_api_performance)
 app.include_router(practice_apis.router)
 app.include_router(user_apis.router)
 app.include_router(auth_apis.router)

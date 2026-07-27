@@ -9,7 +9,7 @@ class MedicalRecordResponse(BaseModel):
     id: int
     patient_id: int
     chart_number: str
-    symptom: str
+    symptoms: str
     xray_image_url: str
     created_at: datetime
 

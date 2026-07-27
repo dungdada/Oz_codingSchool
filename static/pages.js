@@ -8,6 +8,15 @@ const pages = {
         if (state.currentPage !== '/' && state.currentPage !== '/home') return;
         const app = document.getElementById('app');
         app.innerHTML = html;
+        const createPatientButton = document.getElementById('create-patient-btn');
+        const canCreatePatient = state.user?.role === 'admin'
+            || (
+                state.user?.role === 'staff'
+                && state.user?.department === 'medical team'
+            );
+        if (createPatientButton && !canCreatePatient) {
+            createPatientButton.remove();
+        }
         
         const actions = document.getElementById('home-actions');
         if (!state.user) {
@@ -54,7 +63,7 @@ const pages = {
         
         const listBody = document.getElementById('patients-list');
         if (patients.length === 0) {
-            listBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem;">검색 결과가 없습니다.</td></tr>';
+            listBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 2rem;">검색 결과가 없습니다.</td></tr>';
             return;
         }
         listBody.innerHTML = patients.map(p => `
@@ -64,6 +73,8 @@ const pages = {
                 <td>${p.age}</td>
                 <td>${p.gender === 'male' ? '남성' : '여성'}</td>
                 <td>${utils.formatPhoneNumber(p.phone_number)}</td>
+                <td>${new Date(p.created_at).toLocaleString()}</td>
+                <td>${p.updated_at ? new Date(p.updated_at).toLocaleString() : '-'}</td>
                 <td><button onclick="navigate('/patients/${p.id}')">상세보기</button></td>
             </tr>
         `).join('');
@@ -101,7 +112,17 @@ const pages = {
         }
         
         // 버튼 이벤트 바인딩
-        document.getElementById('add-record-btn').onclick = () => navigate(`/patients/${patientId}/medical-records/create`);
+        const addRecordButton = document.getElementById('add-record-btn');
+        const canCreateRecord = state.user?.role === 'admin'
+            || (
+                state.user?.role === 'staff'
+                && state.user?.department === 'medical team'
+            );
+        if (canCreateRecord) {
+            addRecordButton.onclick = () => navigate(`/patients/${patientId}/medical-records/create`);
+        } else {
+            addRecordButton.remove();
+        }
         
         // 상세 페이지 전용 상태 (ID 저장)
         state.currentPatientId = patientId;
@@ -167,19 +188,23 @@ const pages = {
                 <table>
                     <thead>
                         <tr>
+                            <th>ID</th>
                             <th>수행 일시</th>
                             <th>폐렴 여부</th>
                             <th>Confidence</th>
                             <th>사용 모델</th>
+                            <th>Heatmap</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${analyses.map(a => `
                             <tr class="${a.is_pneumonia ? 'result-positive' : 'result-negative'}">
+                                <td>${a.id}</td>
                                 <td>${new Date(a.created_at).toLocaleString()}</td>
                                 <td><strong>${a.is_pneumonia ? 'Positive' : 'Negative'}</strong></td>
                                 <td>${a.confidence}%</td>
                                 <td>${a.ai_model}</td>
+                                <td>${a.heatmap_image_url ? `<a href="${a.heatmap_image_url}" target="_blank" rel="noopener">보기</a>` : '-'}</td>
                             </tr>
                         `).join('')}
                     </tbody>
@@ -231,7 +256,7 @@ const pages = {
 
         const listBody = document.getElementById('admin-users-list');
         if (users.length === 0) {
-            listBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 2rem;">검색 결과가 없습니다.</td></tr>';
+            listBody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 2rem;">검색 결과가 없습니다.</td></tr>';
             return;
         }
         listBody.innerHTML = users.map(u => `
@@ -243,6 +268,7 @@ const pages = {
                 <td>${u.name}</td>
                 <td>${u.email}</td>
                 <td>${u.department}</td>
+                <td>${u.gender === 'male' ? '남성' : '여성'}</td>
                 <td>${utils.formatPhoneNumber(u.phone_number)}</td>
                 <td>${this.getRoleLabel(u.role)}</td>
                 <td>${u.is_active ? '<span class="status-badge success">활성</span>' : '<span class="status-badge error">비활성</span>'}</td>
