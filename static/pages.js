@@ -231,23 +231,20 @@ const pages = {
 
         const listBody = document.getElementById('admin-users-list');
         if (users.length === 0) {
-            listBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem;">검색 결과가 없습니다.</td></tr>';
+            listBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 2rem;">검색 결과가 없습니다.</td></tr>';
             return;
         }
         listBody.innerHTML = users.map(u => `
             <tr>
+                <td>
+                    <input type="checkbox" class="admin-user-checkbox" value="${u.id}" ${u.id === state.user.id ? 'disabled' : ''}>
+                </td>
                 <td>${u.id}</td>
                 <td>${u.name}</td>
                 <td>${u.email}</td>
                 <td>${u.department}</td>
                 <td>${utils.formatPhoneNumber(u.phone_number)}</td>
-                <td>
-                    <select onchange="pages.handleRoleUpdate(${u.id}, this.value)" ${u.id === state.user.id ? 'disabled' : ''}>
-                        <option value="pending" ${u.role === 'pending' ? 'selected' : ''}>승인대기</option>
-                        <option value="staff" ${u.role === 'staff' ? 'selected' : ''}>일반회원</option>
-                        <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>관리자</option>
-                    </select>
-                </td>
+                <td>${this.getRoleLabel(u.role)}</td>
                 <td>${u.is_active ? '<span class="status-badge success">활성</span>' : '<span class="status-badge error">비활성</span>'}</td>
             </tr>
         `).join('');
@@ -272,9 +269,27 @@ const pages = {
         navigate('/admin/users');
     },
 
-    async handleRoleUpdate(userId, newRole) {
+    getRoleLabel(role) {
+        const labels = {
+            pending: '대기자',
+            staff: '스태프',
+            admin: '어드민'
+        };
+        return labels[role] || role;
+    },
+
+    async handleSelectedRoleUpdate() {
+        const selectedUserIds = Array.from(document.querySelectorAll('.admin-user-checkbox:checked'))
+            .map(checkbox => Number(checkbox.value));
+        const newRole = document.getElementById('admin-role-target').value;
+
+        if (selectedUserIds.length === 0) {
+            utils.showAlert('권한을 변경할 회원을 선택해주세요.', 'error', '선택 필요');
+            return;
+        }
+
         try {
-            await apis.adminUpdateUserRole({ user_id: userId, new_role: newRole });
+            await apis.adminUpdateUserRole({ user_ids: selectedUserIds, new_role: newRole });
             utils.showAlert('권한이 변경되었습니다.', 'success');
             this.handleAdminSearch();
         } catch (err) {
