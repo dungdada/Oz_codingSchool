@@ -4,12 +4,14 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.models.user import Gender
 
-PHONE_REGEX = re.compile(r"^01[0-9]-\d{3,4}-\d{4}$")
+PHONE_REGEX = re.compile(r"^01[0-9]-?\d{3,4}-?\d{4}$")
 
 
 def validate_phone_number(phone_number: str) -> str:
     if not PHONE_REGEX.match(phone_number):
-        raise ValueError("연락처는 010-1234-5678 형식이어야 합니다.")
+        raise ValueError(
+            "연락처는 01012345678 또는 010-1234-5678 형식이어야 합니다."
+        )
     return phone_number
 
 
