@@ -23,11 +23,19 @@ def _model_path() -> Path:
 @lru_cache(maxsize=1)
 def load_model():
     import torch
+    import timm
 
-    # 저장소에 포함된 팀 선정 모델 파일만 신뢰하여 로드한다.
-    model = torch.load(_model_path(), map_location="cpu", weights_only=False)
-    if not isinstance(model, torch.nn.Module):
-        raise RuntimeError("지원하지 않는 AI 모델 형식입니다.")
+    model = timm.create_model(
+        settings.AI_MODEL_ARCHITECTURE,
+        pretrained=False,
+        num_classes=settings.AI_MODEL_NUM_CLASSES,
+    )
+    state_dict = torch.load(
+        _model_path(),
+        map_location="cpu",
+        weights_only=True,
+    )
+    model.load_state_dict(state_dict, strict=True)
     model.eval()
     return model
 
