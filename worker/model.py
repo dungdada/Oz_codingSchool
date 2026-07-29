@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 
-from app.core.config import settings
+from worker.config import settings
 
 
 @dataclass(frozen=True)

@@ -1,0 +1,13 @@
+[project]
+name = "ai-worker"
+version = "0.1.0"
+description = "폐렴 예측 AI 워커 - FastAPI 앱과 별도로 배포되는 추론 전용 프로세스"
+requires-python = ">=3.13"
+dependencies = [
+    "numpy>=2.3.0",
+    "pillow>=11.3.0",
+    "pydantic-settings>=2.13.1",
+    "redis>=5.0.0",
+    "timm>=1.0.19",
+    "torch>=2.8.0",
+]

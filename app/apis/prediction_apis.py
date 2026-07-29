@@ -16,7 +16,6 @@ from app.schemas.prediction import (
     PredictionResponse,
 )
 from app.services.prediction_service import PredictionService
-from worker.model import predict_pneumonia
 
 router = APIRouter(
     prefix="/api/v1/medical-records",
@@ -50,7 +49,6 @@ def get_prediction_service(
     return PredictionService(
         repository=PredictionRepository(db),
         upload_dir=XRAY_UPLOAD_DIR,
-        predictor=predict_pneumonia,
     )
 
 
