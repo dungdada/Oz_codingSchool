@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     AI_IMAGE_SIZE: int = 224
     AI_PNEUMONIA_CLASS_INDEX: int = 1
     AI_DECISION_THRESHOLD: float = 0.5
-    AI_INFERENCE_TIMEOUT_SECONDS: float = 2.5
+    AI_INFERENCE_TIMEOUT_SECONDS: float = 10.0
     REDIS_HOST: str = "localhost"
     REDIS_PORT: int = 6379
     REDIS_STREAM_KEY: str = "prediction:tasks"
