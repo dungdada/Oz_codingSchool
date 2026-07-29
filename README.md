@@ -18,7 +18,7 @@
 
 ### 4. Git & GitHub Branch 전략 구성
 
-`features/기능이름`, `docs/문서이름`, `fix/버그이름`, `docker/작업이름` 형태로 브랜치를 나누고, PR에 3명 이상(또는 배분표에 따라 지정된 리뷰어)의 승인을 받은 뒤 `main`에 merge하는 전략을 사용했습니다. 여러 팀원이 병렬로 작업하면서 브랜치 간 충돌, 존재하지 않는 파일을 import하는 문제 등이 반복적으로 발생했는데, 그때마다 원인을 함께 찾아 정리하며 브랜치 전략을 다듬어갔습니다.
+`feature/기능명`, `docs/문서이름`, `fix/버그이름`, `docker/작업이름` 형태로 브랜치를 나누고, `docs/1일차_team_rules.md`에 정한 대로 팀원 한 명 이상의 코드 확인 후(또는 배분표에 따라 지정된 리뷰어의 승인을 받은 뒤) `main`에 merge하는 전략을 사용했습니다. 초반에는 `features/`(복수형)로 쓰다가 팀 규칙 문서의 `feature/`(단수형) 표기에 맞춰 통일했습니다. 여러 팀원이 병렬로 작업하면서 브랜치 간 충돌, 존재하지 않는 파일을 import하는 문제 등이 반복적으로 발생했는데, 그때마다 원인을 함께 찾아 정리하며 브랜치 전략을 다듬어갔습니다.
 
 ### 5. 프로젝트 세팅
 
@@ -57,18 +57,31 @@ AI 추론이 FastAPI와 같은 프로세스에서 동작하면 무거운 연산�
 진료기록에 저장된 X-ray는 다음 API로 분석합니다.
 
 ```http
-POST /api/v1/medical-records/{record_id}/analysis
+POST /api/v1/medical-records/{record_id}/predictions
 Authorization: Bearer <access-token>
 ```
 
-모델은 `app/ml/final_seed42_best8_full_model.pth`의 2-class EfficientNet을
-CPU에서 지연 로드합니다. 현재 추론 설정은 224×224 RGB, ImageNet 정규화,
-class index `1`을 폐렴으로 간주하며 임계값은 `0.5`입니다. 학습 당시 클래스
-순서나 전처리가 다르면 `.env`의 `AI_PNEUMONIA_CLASS_INDEX`,
-`AI_IMAGE_SIZE`, `AI_DECISION_THRESHOLD`를 맞춰야 합니다.
+AI 추론은 FastAPI 프로세스가 아니라 **별도의 `ai-worker` 컨테이너**에서 수행됩니다.
+FastAPI(`app/services/prediction_service.py`)는 요청을 받으면 먼저 DB에 동일
+(진료기록, 모델) 조합의 기존 예측 결과가 있는지 확인하고, 있으면 즉시 그 결과를
+반환합니다. 없으면 Redis Stream(`app/core/redis_client.py`)에 작업을 등록한 뒤
+Redis Pub/Sub 채널을 구독해 결과를 기다립니다.
+
+`ai-worker`(`worker/main.py`)는 Redis Stream을 Consumer Group으로 구독하고 있다가
+작업을 꺼내, `worker/model.py`가 `.env`의 `AI_MODEL_PATH`(예: `worker/models/final_seed42_best8_weights_only.pth`)
+경로의 2-class EfficientNet 체크포인트를 CPU에서 지연 로드(워커 시작 시 warm-up)해
+추론한 뒤, 결과를 Pub/Sub으로 발행합니다. 현재 추론 설정은 224×224 RGB, ImageNet
+정규화, class index `1`을 폐렴으로 간주하며 임계값은 `0.5`입니다. 학습 당시 클래스
+순서나 전처리가 다르면 `.env`의 `AI_PNEUMONIA_CLASS_INDEX`, `AI_IMAGE_SIZE`,
+`AI_DECISION_THRESHOLD`를 맞춰야 합니다.
+
+`ai-worker`는 `worker/pyproject.toml`(torch/timm 등 AI 전용 의존성)로 FastAPI 앱과
+완전히 분리되어 있어, `app/` 쪽 이미지에는 이 의존성이 포함되지 않습니다. 자세한
+설계 배경은 `docs/9일차_동시성문제_해결을위한_아키텍처설계.md`를 참고하세요.
 
 전체 모델 pickle은 임의 코드 실행 위험이 있으므로 저장소에 포함된 검증된
 체크포인트 외의 `.pth` 파일로 교체하지 마세요.
+
 
 ## 개발 관리자 계정
 
